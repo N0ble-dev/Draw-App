@@ -1,8 +1,6 @@
 let canvas = document.getElementById("canvas")
 canvas.height = 400
 let context = canvas.getContext("2d");
-let w = canvas.width
-let h = canvas.height
 
 
 function setCanvasDimensions ()
@@ -27,33 +25,27 @@ let undo = document.getElementById("undo")
 let coordinates = []
 let index = -1
 
-// for lap
-canvas.addEventListener("mousedown", start)
-canvas.addEventListener("mousemove", draw)
-canvas.addEventListener("mouseup", finished)
-
-//for mobile
-canvas.addEventListener("touchstart", start)
-canvas.addEventListener("touchmove", draw)
-canvas.addEventListener("touchend", finished)
 
 
-function start (e)
-{
+// for mobile
+canvas.addEventListener("touchstart", startTouch)
+canvas.addEventListener("touchmove", drawTouch)
+canvas.addEventListener("touchend", finishedTouch)
+
+function startTouch(e) {
     e.preventDefault(); // Prevent default touch behavior (like scrolling)
     drawing = true
     context.beginPath()
-    // get all axis - the space betwen element and body
-    context.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop)
-    // to draw points
-    draw(e)
+    const touch = e.touches[0]; // Get the first touch point
+    context.moveTo(touch.clientX - canvas.offsetLeft, touch.clientY - canvas.offsetTop)
+    drawTouch(e)
 }
 
-function draw (e)
-{
-    e.preventDefault();
+function drawTouch(e) {
     if (!drawing) return
-    context.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop)
+    e.preventDefault();
+    const touch = e.touches[0];
+    context.lineTo(touch.clientX - canvas.offsetLeft, touch.clientY - canvas.offsetTop)
     context.strokeStyle = colorDraw
     context.lineWidth = drawWidth
     context.lineCap = "round"
@@ -61,26 +53,61 @@ function draw (e)
     context.stroke()
 }
 
-function finished ()
+function finishedTouch() {
+    context.beginPath()
+    drawing = false
+    coordinates.push(context.getImageData(0, 0, canvas.width, canvas.height))
+    index++
+}
+
+// for lap
+canvas.addEventListener("mousedown", start)
+canvas.addEventListener("mousemove", draw)
+canvas.addEventListener("mouseup", finished)
+
+function start (e)
 {
-    e.preventDefault(); 
+    drawing = true
+    context.beginPath()
+    // get all axis - the space betwen element and body
+    context.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop)
+    // to draw points
+    draw(e)
+    // e.preventDefault(); // Prevent default touch behavior (like scrolling)
+}
+
+function draw (e)
+{
+    if (!drawing) return
+    context.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop)
+    context.strokeStyle = colorDraw
+    context.lineWidth = drawWidth
+    context.lineCap = "round"
+    context.lineJoin = "round"
+    context.stroke()
+    // e.preventDefault();
+}
+
+function finished (e)
+{
+    // e.preventDefault(); 
     context.beginPath()
     drawing = false
     // get all coordinates and push it
-    coordinates.push(context.getImageData(0, 0, w, h))
+    coordinates.push(context.getImageData(0, 0, canvas.width, canvas.height))
     index++
 }
 
 // clearing canvas
 
-clear.addEventListener("click", () => context.clearRect(0, 0, w, h))
+clear.addEventListener("click", () => context.clearRect(0, 0, canvas.width, canvas.height))
 
 undo.addEventListener("click", undoing)
 
 function undoing ()
 {
     if (index <= 0) {
-        context.clearRect(0, 0, w, h)
+        context.clearRect(0, 0, canvas.width, canvas.height)
     }
     index -= 1
     coordinates.pop()
