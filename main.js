@@ -121,7 +121,11 @@ function getColor (color)
     colorDraw = color
 }
 
-function widthDraw (width)
-{
-    drawWidth = width
+
+let rangeInput = document.getElementById("range");
+
+rangeInput.addEventListener("input", handleRange);
+
+function handleRange() {
+    drawWidth=rangeInput.value
 }
