@@ -103,3 +103,10 @@ margin-right: 4px;
     color: #B9D9EB;
     font-size: 24px;
 }
+@media(max-width:768px){
+#loading-screen{
+padding: 10px;
+gap: 100px;
+text-align: center;
+}
+}
